@@ -102,7 +102,7 @@ jobs:
 
       - name: Upgrade meson
         run: |
-          pacman -Sy --noconfirm python-meson
+          pip install meson --upgrade --break-system-packages
           meson --version
 
       - name: Configuring CMake & Downloading source
