@@ -41,6 +41,8 @@ ExternalProject_Add(mpv
         -Db_lto=true
         ${mpv_lto_mode}
         -Dlibmpv=true
+        -Dd3d11=enabled
+        -Ddirect3d=enabled
         -Dpdf-build=enabled
         -Dlua=enabled
         -Djavascript=enabled
