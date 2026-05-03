@@ -24,9 +24,10 @@ ExternalProject_Add(mpv
         libsdl2
         subrandr
         libsixel
-    GIT_REPOSITORY https://github.com/mpv-player/mpv.git
-    SOURCE_DIR ${SOURCE_LOCATION}
+    GIT_REPOSITORY https://github.com/kasper93/mpv.git
+    GIT_TAG        render_d3d11
     GIT_CLONE_FLAGS "--filter=tree:0"
+    SOURCE_DIR ${SOURCE_LOCATION}
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${EXEC} CONF=1 meson setup <BINARY_DIR> <SOURCE_DIR>
         --prefix=${MINGW_INSTALL_PREFIX}
