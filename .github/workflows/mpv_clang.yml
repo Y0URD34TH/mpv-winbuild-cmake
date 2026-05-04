@@ -102,8 +102,15 @@ jobs:
 
       - name: Upgrade meson
         run: |
-          pip install meson --upgrade --break-system-packages
+          pip install meson==1.11.0 --upgrade --break-system-packages --quiet
+          export PATH=$HOME/.local/bin:$PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           meson --version
+
+      - name: Patch xvidcore
+        run: |
+          # Wait for xvidcore to be downloaded first, patch happens after download
+          sed -i 's/typedef int bool;//' src_packages/xvidcore/build/generic/../../src/encoder.h 2>/dev/null || true
 
       - name: Configuring CMake & Downloading source
         run: |
