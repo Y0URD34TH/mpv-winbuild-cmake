@@ -107,7 +107,7 @@ ExternalProject_Add(ffmpeg
         --disable-doc
         --disable-ffplay
         --disable-ffprobe
-        --enable-vaapi
+        --disable-vaapi
         --disable-vdpau
         --disable-openal
         --disable-videotoolbox
