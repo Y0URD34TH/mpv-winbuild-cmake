@@ -139,13 +139,12 @@ jobs:
           rm -f build_$BIT/packages/libplacebo-prefix/src/libplacebo-stamp/libplacebo-build
           rm -f build_$BIT/packages/libplacebo-prefix/src/libplacebo-stamp/libplacebo-configure
 
-          # Disable libsixel entirely - not needed for mpv
-          sed -i 's/--enable-libsixel/--disable-libsixel/g' packages/ffmpeg.cmake || true
-          sed -i 's/-Dsixel=enabled/-Dsixel=disabled/g' packages/mpv.cmake || true
-          rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build
-          rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-configure
+          # Skip libsixel by replacing its cmake scripts with no-ops
+          echo 'message("Skipping libsixel")' > build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build-.cmake || true
+          echo 'message("Skipping libsixel")' > build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-configure-.cmake || true
           touch build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build
           touch build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-install
+          touch build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-configure
 
           # Disable libssh and libx265 in ffmpeg (not needed for playback)
           sed -i 's/--enable-libssh/--disable-libssh/g' packages/ffmpeg.cmake || true
