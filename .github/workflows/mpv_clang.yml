@@ -139,15 +139,16 @@ jobs:
           rm -f build_$BIT/packages/libplacebo-prefix/src/libplacebo-stamp/libplacebo-build
           rm -f build_$BIT/packages/libplacebo-prefix/src/libplacebo-stamp/libplacebo-configure
 
-          # Fix libsixel loader.c undeclared allocator variable
-          find src_packages/libsixel -name "loader.c" -exec sed -i \
-            's/    if (allocator != NULL) {/    sixel_allocator_t *allocator = NULL;\n    if (allocator != NULL) {/' {} \; || true
+          # Disable libsixel entirely - not needed for mpv
+          sed -i 's/--enable-libsixel/--disable-libsixel/g' packages/ffmpeg.cmake || true
+          sed -i 's/-Dsixel=enabled/-Dsixel=disabled/g' packages/mpv.cmake || true
           rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build
           rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-configure
+          touch build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build
+          touch build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-install
 
-          # Disable libssh in ffmpeg
+          # Disable libssh and libx265 in ffmpeg (not needed for playback)
           sed -i 's/--enable-libssh/--disable-libssh/g' packages/ffmpeg.cmake || true
-
           sed -i 's/--enable-libx265/--disable-libx265/g' packages/ffmpeg.cmake || true
 
           # Force ffmpeg reconfigure
