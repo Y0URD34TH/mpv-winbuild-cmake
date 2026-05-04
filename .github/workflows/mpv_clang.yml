@@ -120,6 +120,13 @@ jobs:
       - name: Patch libbluray
         run: |
           sed -i "s/dependency('ssp')/dependency('ssp', required: false)/" src_packages/libbluray/meson.build || true
+
+      - name: Apply patches to cached sources
+        run: |
+          # Fix xvidcore bool typedef
+          sed -i "s/typedef int bool;//" src_packages/xvidcore/src/encoder.h || true
+          # Fix libbluray ssp
+          sed -i "s/dependency('ssp')/dependency('ssp', required: false)/" src_packages/libbluray/meson.build || true
           
       - name: Building mpv
         id: build_mpv_step
