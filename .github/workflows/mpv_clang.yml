@@ -118,7 +118,7 @@ jobs:
         run: |
           ninja -C build_$BIT update
 
-          # Fix xvidcore bool typedef (clang rejects typedef int bool)
+          # Fix xvidcore bool typedef
           find build_$BIT/packages/xvidcore-prefix -name "encoder.h" -exec sed -i "s/typedef int bool;//" {} \; || true
           rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-build
           rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-configure
@@ -145,15 +145,16 @@ jobs:
           rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build
           rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-configure
 
-          # Disable libssh in ffmpeg (not needed, causes static linking issues)
+          # Disable libssh in ffmpeg
           sed -i 's/--enable-libssh/--disable-libssh/g' packages/ffmpeg.cmake || true
 
-          # Build x265 first to avoid race condition with ffmpeg configure
-          ninja -C build_$BIT x265
+          # Build x265 variants sequentially to avoid race condition with ffmpeg
+          ninja -C build_$BIT x265-10bit-lib
           ninja -C build_$BIT x265-8+10bit
 
-          # Force ffmpeg full clean and rebuild after all deps are ready
-          ninja -C build_$BIT ffmpeg-fullclean || true
+          # Force ffmpeg reconfigure after x265 is done
+          ninja -C build_$BIT ffmpeg-liteclean || true
+          rm -f build_$BIT/packages/ffmpeg-prefix/src/ffmpeg-stamp/ffmpeg-configure
           ninja -C build_$BIT ffmpeg
 
           $MPV_TARBALL && ninja -C build_$BIT mpv-release || ninja -C build_$BIT mpv
