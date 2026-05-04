@@ -103,13 +103,13 @@ ExternalProject_Add(ffmpeg
         --enable-libaribcaption
         ${ffmpeg_cuda}
         --enable-amf
-        --enable-openal
         --enable-opengl
         --disable-doc
         --disable-ffplay
         --disable-ffprobe
         --enable-vaapi
         --disable-vdpau
+        --disable-openal
         --disable-videotoolbox
         --disable-decoder=libaom_av1
         ${ffmpeg_lto}
