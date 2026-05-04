@@ -139,9 +139,15 @@ jobs:
           rm -f build_$BIT/packages/libplacebo-prefix/src/libplacebo-stamp/libplacebo-build
           rm -f build_$BIT/packages/libplacebo-prefix/src/libplacebo-stamp/libplacebo-configure
 
+          # Fix libsixel loader.c undeclared allocator variable
+          find src_packages/libsixel -name "loader.c" -exec sed -i \
+            's/    if (allocator != NULL) {/    sixel_allocator_t *allocator = NULL;\n    if (allocator != NULL) {/' {} \; || true
+          rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build
+          rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-configure
+
           $MPV_TARBALL && ninja -C build_$BIT mpv-release || ninja -C build_$BIT mpv
           $MPV_TARBALL && echo "mpv_ver=$(cat build_$BIT/packages/mpv-release-prefix/VERSION)" >> $GITHUB_OUTPUT || echo "mpv_ver=UNKNOWN" >> $GITHUB_OUTPUT
-
+          
       - name: Packaging mpv
         run: |
           mkdir -p release_$BIT
