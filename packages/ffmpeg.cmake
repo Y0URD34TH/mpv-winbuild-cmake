@@ -86,14 +86,12 @@ ExternalProject_Add(ffmpeg
         --enable-libx264
         --enable-libaom
         --enable-libsvtav1
-        --enable-libdav1d
-        ${ffmpeg_davs2_cmd}
-        ${ffmpeg_uavs3d_cmd}
+        --disable-libdav1d
         --enable-libxvid
         --enable-libzimg
         --enable-openssl
         --enable-libxml2
-        --enable-libmysofa
+        --disable-libmysofa
         --enable-libsrt
         --enable-libvpl
         --enable-libjxl
@@ -103,7 +101,7 @@ ExternalProject_Add(ffmpeg
         --enable-libaribcaption
         ${ffmpeg_cuda}
         --enable-amf
-        --enable-opengl
+        --disable-opengl
         --disable-doc
         --disable-ffplay
         --disable-ffprobe
