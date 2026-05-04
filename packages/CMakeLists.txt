@@ -85,7 +85,6 @@ list(APPEND ep
     libva
     libzvbi
     libaribcaption
-    libsixel
     ffmpeg
     mpv
     mpv-release
