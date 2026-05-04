@@ -145,6 +145,11 @@ jobs:
           rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build
           rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-configure
 
+          # Disable libssh in ffmpeg (static lib not compatible with ffmpeg's pkg-config detection)
+          sed -i 's/--enable-libssh/--disable-libssh/g' packages/ffmpeg.cmake || true
+          rm -f build_$BIT/packages/ffmpeg-prefix/src/ffmpeg-stamp/ffmpeg-configure
+          rm -f build_$BIT/packages/ffmpeg-prefix/src/ffmpeg-stamp/ffmpeg-build
+
           # Force ffmpeg to reconfigure after all deps are done (race condition fix)
           rm -f build_$BIT/packages/ffmpeg-prefix/src/ffmpeg-stamp/ffmpeg-configure
           rm -f build_$BIT/packages/ffmpeg-prefix/src/ffmpeg-stamp/ffmpeg-build
