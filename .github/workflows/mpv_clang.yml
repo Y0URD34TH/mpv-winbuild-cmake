@@ -119,15 +119,21 @@ jobs:
 
       - name: Apply source patches
         run: |
-          # Fix xvidcore bool typedef - try all possible paths
-          find src_packages/xvidcore -name "encoder.h" -exec sed -i "s/typedef int bool;//" {} \;
+          # Fix xvidcore - patch in the build prefix where it actually extracts
+          find build_$BIT/packages/xvidcore-prefix -name "encoder.h" -exec sed -i "s/typedef int bool;//" {} \;
+          find src_packages -name "encoder.h" -path "*/xvidcore/*" -exec sed -i "s/typedef int bool;//" {} \;
           # Fix libbluray ssp
           sed -i "s/dependency('ssp')/dependency('ssp', required: false)/" src_packages/libbluray/meson.build || true
+          # Fix libzimg missing graphengine submodule
+          git -C src_packages/libzimg submodule update --init --recursive || true
           # Delete stamp files to force rebuild
           rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-build
           rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-configure
           rm -f build_$BIT/packages/libbluray-prefix/src/libbluray-stamp/libbluray-build
           rm -f build_$BIT/packages/libbluray-prefix/src/libbluray-stamp/libbluray-configure
+          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-build
+          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-configure
+          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-build
 
       - name: Building mpv
         id: build_mpv_step
