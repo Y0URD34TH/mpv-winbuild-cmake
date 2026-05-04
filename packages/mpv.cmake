@@ -58,7 +58,7 @@ ExternalProject_Add(mpv
         -Dvulkan=enabled
         -Dvapoursynth=enabled
         -Dsubrandr=enabled
-        -Dsixel=disabled
+        -Dsixel=enabled
         ${mpv_gl}
         -Dc_args='-Wno-error=int-conversion'
     BUILD_COMMAND ${EXEC} LTO_JOB=1 PDB=1 ninja -C <BINARY_DIR>
