@@ -23,7 +23,6 @@ ExternalProject_Add(mpv
         vapoursynth
         libsdl2
         subrandr
-        libsixel
     GIT_REPOSITORY https://github.com/kasper93/mpv.git
     GIT_TAG        render_d3d11
     GIT_CLONE_FLAGS "--filter=tree:0"
