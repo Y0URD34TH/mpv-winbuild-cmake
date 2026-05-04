@@ -102,42 +102,14 @@ jobs:
 
       - name: Upgrade meson
         run: |
-          pip install meson==1.11.0 --upgrade --break-system-packages --quiet
-          export PATH=$HOME/.local/bin:$PATH
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          pip install meson --upgrade --break-system-packages --quiet
+          ln -sf ~/.local/bin/meson /usr/local/bin/meson || true
           meson --version
-
-      - name: Patch xvidcore
-        run: |
-          # Wait for xvidcore to be downloaded first, patch happens after download
-          sed -i 's/typedef int bool;//' src_packages/xvidcore/build/generic/../../src/encoder.h 2>/dev/null || true
 
       - name: Configuring CMake & Downloading source
         run: |
           cmake -DTARGET_ARCH=${{ env.arch }}-w64-mingw32 -DCOMPILER_TOOLCHAIN=clang ${{ env.x86_64_v3_ARCH }} -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_$BIT/$BIT-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -DENABLE_CCACHE=ON -DCLANG_PACKAGES_LTO=ON -G Ninja --fresh -B build_$BIT -S $PWD
           ninja -C build_$BIT download || true
-
-      - name: Apply source patches
-        run: |
-          # Fix xvidcore - patch in the build prefix where it actually extracts
-          find build_$BIT/packages/xvidcore-prefix -name "encoder.h" -exec sed -i "s/typedef int bool;//" {} \;
-          find src_packages -name "encoder.h" -path "*/xvidcore/*" -exec sed -i "s/typedef int bool;//" {} \;
-          # Fix libbluray ssp
-          sed -i "s/dependency('ssp')/dependency('ssp', required: false)/" src_packages/libbluray/meson.build || true
-          # Fix libzimg missing graphengine submodule
-          git -C src_packages/libzimg submodule update --init --recursive || true
-          # Delete stamp files to force rebuild
-          # Fix xvidcore - only in build prefix
-          find build_$BIT/packages/xvidcore-prefix -name "encoder.h" -exec sed -i "s/typedef int bool;//" {} \; || true
-          rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-build
-          rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-configure
-          rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-build
-          rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-configure
-          rm -f build_$BIT/packages/libbluray-prefix/src/libbluray-stamp/libbluray-build
-          rm -f build_$BIT/packages/libbluray-prefix/src/libbluray-stamp/libbluray-configure
-          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-build
-          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-configure
-          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-build
 
       - name: Building mpv
         id: build_mpv_step
@@ -145,8 +117,28 @@ jobs:
           MPV_TARBALL: ${{ github.event.inputs.mpv_tarball }}
         run: |
           ninja -C build_$BIT update
-          sed -i "s/typedef int bool;//" src_packages/xvidcore/src/encoder.h || true
+
+          # Fix xvidcore bool typedef (clang rejects typedef int bool)
+          find build_$BIT/packages/xvidcore-prefix -name "encoder.h" -exec sed -i "s/typedef int bool;//" {} \; || true
+          rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-build
+          rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-configure
+
+          # Fix libbluray missing libssp
           sed -i "s/dependency('ssp')/dependency('ssp', required: false)/" src_packages/libbluray/meson.build || true
+          rm -f build_$BIT/packages/libbluray-prefix/src/libbluray-stamp/libbluray-build
+          rm -f build_$BIT/packages/libbluray-prefix/src/libbluray-stamp/libbluray-configure
+
+          # Fix libzimg missing graphengine submodule
+          rm -rf src_packages/libzimg/graphengine
+          git -C src_packages/libzimg submodule update --init --recursive || true
+          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-build
+          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-configure
+
+          # Fix libplacebo missing glad submodule
+          git -C src_packages/libplacebo submodule update --init --recursive || true
+          rm -f build_$BIT/packages/libplacebo-prefix/src/libplacebo-stamp/libplacebo-build
+          rm -f build_$BIT/packages/libplacebo-prefix/src/libplacebo-stamp/libplacebo-configure
+
           $MPV_TARBALL && ninja -C build_$BIT mpv-release || ninja -C build_$BIT mpv
           $MPV_TARBALL && echo "mpv_ver=$(cat build_$BIT/packages/mpv-release-prefix/VERSION)" >> $GITHUB_OUTPUT || echo "mpv_ver=UNKNOWN" >> $GITHUB_OUTPUT
 
@@ -333,7 +325,6 @@ jobs:
       - name: Pruning tags
         continue-on-error: true
         run: |
-          # Keep latest 30 tags/releases
           git fetch --tags
           tag_list=($(git tag | sort -r))
           old=${tag_list[@]:30}
