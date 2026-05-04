@@ -117,23 +117,28 @@ jobs:
           cmake -DTARGET_ARCH=${{ env.arch }}-w64-mingw32 -DCOMPILER_TOOLCHAIN=clang ${{ env.x86_64_v3_ARCH }} -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_$BIT/$BIT-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -DENABLE_CCACHE=ON -DCLANG_PACKAGES_LTO=ON -G Ninja --fresh -B build_$BIT -S $PWD
           ninja -C build_$BIT download || true
 
-      - name: Patch libbluray
-        run: |
-          sed -i "s/dependency('ssp')/dependency('ssp', required: false)/" src_packages/libbluray/meson.build || true
-
-      - name: Apply patches to cached sources
+      - name: Apply source patches
         run: |
           # Fix xvidcore bool typedef
           sed -i "s/typedef int bool;//" src_packages/xvidcore/src/encoder.h || true
           # Fix libbluray ssp
           sed -i "s/dependency('ssp')/dependency('ssp', required: false)/" src_packages/libbluray/meson.build || true
-          
+          # Delete stamp files to force rebuild of patched packages
+          rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-build
+          rm -f build_$BIT/packages/xvidcore-prefix/src/xvidcore-stamp/xvidcore-configure
+          rm -f build_$BIT/packages/libbluray-prefix/src/libbluray-stamp/libbluray-build
+          rm -f build_$BIT/packages/libbluray-prefix/src/libbluray-stamp/libbluray-configure
+          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-build
+          rm -f build_$BIT/packages/libzimg-prefix/src/libzimg-stamp/libzimg-configure
+
       - name: Building mpv
         id: build_mpv_step
         env:
           MPV_TARBALL: ${{ github.event.inputs.mpv_tarball }}
         run: |
           ninja -C build_$BIT update
+          sed -i "s/typedef int bool;//" src_packages/xvidcore/src/encoder.h || true
+          sed -i "s/dependency('ssp')/dependency('ssp', required: false)/" src_packages/libbluray/meson.build || true
           $MPV_TARBALL && ninja -C build_$BIT mpv-release || ninja -C build_$BIT mpv
           $MPV_TARBALL && echo "mpv_ver=$(cat build_$BIT/packages/mpv-release-prefix/VERSION)" >> $GITHUB_OUTPUT || echo "mpv_ver=UNKNOWN" >> $GITHUB_OUTPUT
 
