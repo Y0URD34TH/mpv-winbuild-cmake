@@ -38,7 +38,6 @@ ExternalProject_Add(mpv-release
         vapoursynth
         libsdl2
         subrandr
-        libsixel
     URL ${LINK}
     SOURCE_DIR ${SOURCE_LOCATION}
     CONFIGURE_COMMAND ${EXEC} CONF=1 meson setup <BINARY_DIR> <SOURCE_DIR>
