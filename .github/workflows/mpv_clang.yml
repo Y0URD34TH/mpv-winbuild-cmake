@@ -145,8 +145,9 @@ jobs:
           rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-build
           rm -f build_$BIT/packages/libsixel-prefix/src/libsixel-stamp/libsixel-configure
 
-          # Disable libssh and libx265 in ffmpeg (not needed for playback)
+          # Disable libssh in ffmpeg
           sed -i 's/--enable-libssh/--disable-libssh/g' packages/ffmpeg.cmake || true
+
           sed -i 's/--enable-libx265/--disable-libx265/g' packages/ffmpeg.cmake || true
 
           # Force ffmpeg reconfigure
